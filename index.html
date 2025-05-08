@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Smart Task Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo {
+            width: 40px;
+            height: 40px;
+            position: relative;
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+        .logo-circle {
+            width: 100%;
+            height: 100%;
+            border: 3px solid var(--accent-color);
+            border-radius: 50%;
+            position: absolute;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .logo-checkmark {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-right: 3px solid var(--accent-color);
+            border-bottom: 3px solid var(--accent-color);
+            transform: rotate(45deg);
+            top: 8px;
+            left: 10px;
+            animation: checkmark 2s ease-in-out infinite;
+        }
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        @keyframes checkmark {
+            0%, 100% { transform: rotate(45deg) scale(1); }
+            50% { transform: rotate(45deg) scale(0.9); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <div class="logo">
+                    <div class="logo-circle"></div>
+                    <div class="logo-checkmark"></div>
+                </div>
+                <h1>TaskFlow</h1>
+            </div>
+            <div class="theme-controls">
+                <button id="theme-toggle" class="theme-toggle" title="Toggle Theme">🌙</button>
+                <!-- <div class="theme-preferences">
+                    <select id="theme-preference" class="theme-select">
+                        <option value="light">Light Mode</option>
+                        <option value="dark">Dark Mode</option>
+                        <option value="auto">Auto (6:00 PM)</option>
+                    </select>
+                </div> -->
+            </div>
+        </header>
+
+        <div class="quick-actions">
+            <button id="sort-due-today" class="quick-action-btn">Due Today</button>
+            <button id="sort-priority-high" class="quick-action-btn">High Priority</button>
+            <button id="show-stats" class="quick-action-btn">Show Stats</button>
+        </div>
+
+        <div id="stats-modal" class="modal">
+            <div class="modal-content">
+                <h2>Task Statistics</h2>
+                <div id="stats-container" class="stats-container">
+                    <!-- Stats will be inserted here by JavaScript -->
+                </div>
+                <button id="close-stats" class="close-btn">Close</button>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="search" placeholder="Search tasks..." class="search-input">
+        </div>
+
+        <form id="todo-form" class="todo-form">
+            <div class="input-group">
+                <input type="text" id="todo-input" placeholder="Add a new task..." required>
+                <select id="priority-select" class="priority-select">
+                    <option value="low">Low Priority</option>
+                    <option value="medium" selected>Medium Priority</option>
+                    <option value="high">High Priority</option>
+                </select>
+                <select id="category-select" class="category-select">
+                    <option value="personal">Personal</option>
+                    <option value="work">Work</option>
+                    <option value="shopping">Shopping</option>
+                    <option value="health">Health</option>
+                    <option value="other">Other</option>
+                </select>
+                <input type="date" id="due-date" class="date-input">
+            </div>
+            <div class="additional-options">
+                <div class="reminder-group">
+                    <label>Reminder:</label>
+                    <input type="time" id="reminder-time" class="time-input">
+                </div>
+                <div class="notes-group">
+                    <label>Notes:</label>
+                    <textarea id="todo-notes" placeholder="Add notes..." class="notes-input"></textarea>
+                </div>
+            </div>
+            <button type="submit" class="add-button">Add Task</button>
+        </form>
+
+        <div class="bulk-actions">
+            <div class="selection-controls">
+                <input type="checkbox" id="select-all" class="select-all-checkbox">
+                <label for="select-all">Select All</label>
+            </div>
+            <div class="bulk-action-buttons">
+                <button id="bulk-complete" class="bulk-action-btn" disabled>Complete Selected</button>
+                <button id="bulk-delete" class="bulk-action-btn danger" disabled>Delete Selected</button>
+                <select id="bulk-priority" class="bulk-action-select" disabled>
+                    <option value="">Set Priority</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+                <select id="bulk-category" class="bulk-action-select" disabled>
+                    <option value="">Move to Category</option>
+                    <option value="personal">Personal</option>
+                    <option value="work">Work</option>
+                    <option value="shopping">Shopping</option>
+                    <option value="health">Health</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label>Status:</label>
+                <select id="status-filter">
+                    <option value="all">All</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Priority:</label>
+                <select id="priority-filter">
+                    <option value="all">All</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Category:</label>
+                <select id="category-filter">
+                    <option value="all">All</option>
+                    <option value="personal">Personal</option>
+                    <option value="work">Work</option>
+                    <option value="shopping">Shopping</option>
+                    <option value="health">Health</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Sort by:</label>
+                <select id="sort-select">
+                    <option value="priority">Priority</option>
+                    <option value="dueDate">Due Date</option>
+                    <option value="category">Category</option>
+                    <option value="manual">Manual Order</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="todo-stats">
+            <span id="items-left">0 items left</span>
+            <div class="progress-bar">
+                <div id="completion-progress" class="progress"></div>
+            </div>
+            <button id="clear-completed" class="clear-completed">Clear Completed</button>
+        </div>
+
+        <ul id="todo-list" class="todo-list"></ul>
+
+        <!-- Edit Task Modal -->
+        <div id="edit-modal" class="modal">
+            <div class="modal-content">
+                <h2>Edit Task</h2>
+                <form id="edit-form" class="edit-form">
+                    <input type="hidden" id="edit-id">
+                    <div class="input-group">
+                        <input type="text" id="edit-text" required>
+                        <select id="edit-priority">
+                            <option value="low">Low Priority</option>
+                            <option value="medium">Medium Priority</option>
+                            <option value="high">High Priority</option>
+                        </select>
+                        <select id="edit-category">
+                            <option value="personal">Personal</option>
+                            <option value="work">Work</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="health">Health</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <input type="date" id="edit-due-date">
+                    </div>
+                    <div class="additional-options">
+                        <div class="reminder-group">
+                            <label>Reminder:</label>
+                            <input type="time" id="edit-reminder">
+                        </div>
+                        <div class="notes-group">
+                            <label>Notes:</label>
+                            <textarea id="edit-notes" placeholder="Add notes..."></textarea>
+                        </div>
+                    </div>
+                    <div class="edit-actions">
+                        <button type="submit" class="save-btn">Save Changes</button>
+                        <button type="button" class="cancel-btn" id="close-edit">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
